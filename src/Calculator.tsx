@@ -2,6 +2,67 @@ import { useState } from "react";
 import styles from "./calculator.module.css";
 
 const Calculator = () => {
+  const [display, setDisplay] = useState<string>("");
+  const [result, setResult] = useState<boolean>(false);
+  const [previousValue, setPreviousValue] = useState<number | null>(null);
+  const [operator, setOperator] = useState<string | null>(null);
+
+  const handleClick = (value: string) => {
+    if (value === "=") {
+      if (previousValue !== null && operator) {
+        const currentValue = parseFloat(display);
+        let result;
+
+        if (operator === "+") {
+          result = previousValue! + currentValue;
+        } else if (operator === "-") {
+          result = previousValue! - currentValue;
+        } else if (operator === "*") {
+          result = previousValue! * currentValue;
+        } else if (operator === "/") {
+          result = previousValue! / currentValue;
+        }
+
+        setDisplay(String(result));
+        setPreviousValue(null);
+        setOperator(null);
+        setResult(true);
+      }
+    } else if (value === "C") {
+      setDisplay("");
+      setResult(false);
+    } else if (value === "exponenta") {
+      const e = Math.E;
+      setDisplay(String(e));
+      setResult(true);
+    } else if (value === "+") {
+      setPreviousValue(parseFloat(display));
+      setOperator("+");
+      setResult(true);
+    } else if (value === "-") {
+      setPreviousValue(parseFloat(display));
+      setOperator("-");
+      setResult(true);
+    } else if (value === "*") {
+      setPreviousValue(parseFloat(display));
+      setOperator("*");
+      setResult(true);
+    } else if (value === "/") {
+      setPreviousValue(parseFloat(display));
+      setOperator("/");
+      setResult(true);
+    } else if (value === "del") {
+      setDisplay((prev) => prev.slice(0, -1));
+    } else {
+      if (result && /[0-9]/.test(value)) {
+        setDisplay(value);
+        setResult(false);
+      } else {
+        setDisplay((prev) => (result ? value : prev + value));
+        setResult(false);
+      }
+    }
+  };
   const operations: { label: string; value: string; className: string }[][] = [
     [
       { label: "xʸ", value: "^", className: styles.anotheroperations },

@@ -2,6 +2,16 @@ import { useState } from "react";
 import styles from "./calculator.module.css";
 
 const Calculator = () => {
+  const pow = (num: number): number => {
+    return 1 / num;
+  };
+
+  const Log = (type: "lg" | "ln", num: number): number => {
+    if (type === "lg") return Math.log10(num);
+    if (type === "ln") return Math.log(num);
+    return NaN;
+  };
+
   const [display, setDisplay] = useState<string>("");
   const [result, setResult] = useState<boolean>(false);
   const [previousValue, setPreviousValue] = useState<number | null>(null);
@@ -35,6 +45,30 @@ const Calculator = () => {
       const e = Math.E;
       setDisplay(String(e));
       setResult(true);
+    } else if (value === "pi") {
+      const pi = Math.PI;
+      setDisplay(String(pi));
+      setResult(true);
+    }  else if (value === "^") {
+      setPreviousValue(parseFloat(display));
+      setOperator("^");
+      setResult(true);
+    }  else if (value === "1/x") {
+      const match = display.match(/(\d+)$/);
+      if (match) {
+        const num = parseFloat(match[0]);
+        const powResult = pow(num);
+        setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(powResult)));
+        setResult(true);
+      }
+    } else if (value === "lg" || value === "ln") {
+      const match = display.match(/(\d+)$/);
+      if (match) {
+        const num = parseFloat(match[0]);
+        const logResult = Log(value, num);
+        setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(logResult)));
+        setResult(true);
+      }
     } else if (value === "+") {
       setPreviousValue(parseFloat(display));
       setOperator("+");

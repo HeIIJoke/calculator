@@ -2,6 +2,21 @@ import { useState } from "react";
 import styles from "./calculator.module.css";
 
 const Calculator = () => {
+  const factorial = (num: number): number => {
+    if (num < 0) return NaN;
+    if (num === 0 || num === 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= num; i++) {
+      result *= i;
+    }
+    return result;
+  };
+
+  const sqrt = (num: number): number => {
+    if (num < 0) return NaN;
+    return Math.sqrt(num);
+  };
+
   const pow = (num: number): number => {
     return 1 / num;
   };
@@ -9,6 +24,13 @@ const Calculator = () => {
   const Log = (type: "lg" | "ln", num: number): number => {
     if (type === "lg") return Math.log10(num);
     if (type === "ln") return Math.log(num);
+    return NaN;
+  };
+
+  const trig = (type: "tan" | "sin" | "cos", num: number): number => {
+    if (type === "sin") return Math.sin(num);
+    if (type === "cos") return Math.cos(num);
+    if (type === "tan") return Math.tan(num);
     return NaN;
   };
 
@@ -31,6 +53,8 @@ const Calculator = () => {
           result = previousValue! * currentValue;
         } else if (operator === "/") {
           result = previousValue! / currentValue;
+        } else if (operator === "^") {
+          result = Math.pow(previousValue, currentValue);
         }
 
         setDisplay(String(result));
@@ -41,19 +65,43 @@ const Calculator = () => {
     } else if (value === "C") {
       setDisplay("");
       setResult(false);
-    } else if (value === "exponenta") {
-      const e = Math.E;
-      setDisplay(String(e));
-      setResult(true);
     } else if (value === "pi") {
       const pi = Math.PI;
       setDisplay(String(pi));
       setResult(true);
-    }  else if (value === "^") {
+    } else if (value === "exponenta") {
+      const e = Math.E;
+      setDisplay(String(e));
+      setResult(true);
+    } else if (value === "sqrt") {
+      const match = display.match(/(\d+)$/);
+      if (match) {
+        const num = parseFloat(match[0]);
+        const sqrtResult = sqrt(num);
+        setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(sqrtResult)));
+        setResult(true);
+      }
+    } else if (value === "factorial") {
+      const match = display.match(/(\d+)$/);
+      if (match) {
+        const num = parseInt(match[0], 10);
+        const fact = factorial(num);
+        setDisplay(display.replace(/(\d+)$/, String(fact)));
+        setResult(true);
+      }
+    } else if (value === "+") {
+      setPreviousValue(parseFloat(display));
+      setOperator("+");
+      setResult(true);
+    } else if (value === "^") {
       setPreviousValue(parseFloat(display));
       setOperator("^");
       setResult(true);
-    }  else if (value === "1/x") {
+    } else if (value === "-") {
+      setPreviousValue(parseFloat(display));
+      setOperator("-");
+      setResult(true);
+    } else if (value === "1/x") {
       const match = display.match(/(\d+)$/);
       if (match) {
         const num = parseFloat(match[0]);
@@ -61,22 +109,6 @@ const Calculator = () => {
         setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(powResult)));
         setResult(true);
       }
-    } else if (value === "lg" || value === "ln") {
-      const match = display.match(/(\d+)$/);
-      if (match) {
-        const num = parseFloat(match[0]);
-        const logResult = Log(value, num);
-        setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(logResult)));
-        setResult(true);
-      }
-    } else if (value === "+") {
-      setPreviousValue(parseFloat(display));
-      setOperator("+");
-      setResult(true);
-    } else if (value === "-") {
-      setPreviousValue(parseFloat(display));
-      setOperator("-");
-      setResult(true);
     } else if (value === "*") {
       setPreviousValue(parseFloat(display));
       setOperator("*");
@@ -85,6 +117,22 @@ const Calculator = () => {
       setPreviousValue(parseFloat(display));
       setOperator("/");
       setResult(true);
+    } else if (value === "lg" || value === "ln") {
+      const match = display.match(/(\d+)$/);
+      if (match) {
+        const num = parseFloat(match[0]);
+        const logResult = Log(value, num);
+        setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(logResult)));
+        setResult(true);
+      }
+    } else if (value === "tan" || value === "sin" || value === "cos") {
+      const match = display.match(/(\d+)$/);
+      if (match) {
+        const num = parseFloat(match[0]);
+        const trigResult = trig(value, num);
+        setDisplay(display.replace(/(\d+(\.\d+)?)$/, String(trigResult)));
+        setResult(true);
+      }
     } else if (value === "del") {
       setDisplay((prev) => prev.slice(0, -1));
     } else {
@@ -97,6 +145,7 @@ const Calculator = () => {
       }
     }
   };
+
   const operations: { label: string; value: string; className: string }[][] = [
     [
       { label: "xʸ", value: "^", className: styles.anotheroperations },
@@ -144,14 +193,14 @@ const Calculator = () => {
 
   return (
     <div className={styles.calculator}>
-      <div className={styles.display}>{"0"}</div>
+      <div className={styles.display}>{display || "0"}</div>
       <div className={styles.buttons}>
         {operations.map((row, rowIndex) => (
           <div key={rowIndex} className="buttons-row">
             {row.map((operation) => (
               <button
                 key={operation.value}
-                onClick={() => {}}
+                onClick={() => handleClick(operation.value)}
                 className={operation.className}
               >
                 {operation.label}
